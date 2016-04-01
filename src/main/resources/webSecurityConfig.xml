@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-3.2.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+
+    <!--POST http://localhost:8080/j_spring_security_check?j_username=temporary&j_password=temporary-->
+    <!--<http use-expressions="true" entry-point-ref="restAuthenticationEntryPoint" >-->
+
+
+    <beans:bean id="loginUrlAuthenticationEntryPoint"
+                class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <beans:property name="loginFormUrl" value="/login.html"/>
+    </beans:bean>
+    <beans:bean id="customUsernamePasswordAuthenticationFilter"
+                class="com.rvr.lecture.security.CustomUsernamePasswordAuthenticationFilter">
+        <beans:property name="authenticationManager" ref="authenticationManager"/>
+        <beans:property name="authenticationFailureHandler" ref="myFailureHandler"/>
+        <beans:property name="authenticationSuccessHandler" ref="mySuccessHandler"/>
+    </beans:bean>
+
+    <beans:bean id="mySuccessHandler" class="com.rvr.lecture.security.MySavedRequestAwareAuthenticationSuccessHandler" />
+    <beans:bean id="myFailureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler" />
+
+    <!--<http use-expressions="true" auto-config="false"  entry-point-ref="loginUrlAuthenticationEntryPoint">-->
+        <!--<custom-filter position="FORM_LOGIN_FILTER" ref="customUsernamePasswordAuthenticationFilter"/>-->
+        <!--<intercept-url pattern="/login.html" access="permitAll" />-->
+        <!--<intercept-url pattern="/api/**" access="isAuthenticated()" />-->
+        <!--<sec:form-login authentication-success-handler-ref="mySuccessHandler" authentication-failure-handler-ref="myFailureHandler" />-->
+
+
+
+        <!--<logout />-->
+    <!--</http>-->
+
+
+     <http use-expressions="true" >
+
+        <http-basic />
+
+    </http>
+
+    <sec:authentication-manager alias="authenticationManager">
+        <authentication-provider>
+            <user-service>
+                <user name="admin" password="admin" authorities="ROLE_ADMIN" />
+                <user name="user" password="userPass" authorities="ROLE_USER" />
+            </user-service>
+        </authentication-provider>
+
+        <sec:authentication-provider user-service-ref="customUserDetailsService" />
+    </sec:authentication-manager>
+
+
+    <global-method-security pre-post-annotations="enabled" secured-annotations="enabled" proxy-target-class="true" />
+
+</beans:beans>
